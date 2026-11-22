@@ -1,0 +1,49 @@
+"""Beikao-AI 命令行入口。"""
+import argparse
+from automation.adb import check_adb, take_screenshot
+from automation.gesture import swipe_next
+from recognition.ocr import recognize
+from database.questions import add_wrong, list_wrong
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(description="Beikao-AI Android 刷题辅助原型")
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("check", help="检查 ADB 连接")
+    sub.add_parser("screenshot", help="截取手机屏幕")
+    sub.add_parser("ocr", help="截图并执行 OCR")
+    add = sub.add_parser("add-wrong", help="手动添加错题")
+    add.add_argument("--question", required=True)
+    add.add_argument("--answer", default="")
+    add.add_argument("--note", default="")
+    sub.add_parser("list-wrong", help="查看错题本")
+    swipe = sub.add_parser("swipe-next", help="执行一次右向左滑动")
+    swipe.add_argument("--confirm", action="store_true", help="明确确认执行手势")
+    return parser
+
+
+def main():
+    args = build_parser().parse_args()
+    if args.command == "check":
+        print(check_adb())
+    elif args.command == "screenshot":
+        print(f"截图已保存：{take_screenshot()}")
+    elif args.command == "ocr":
+        print(recognize())
+    elif args.command == "add-wrong":
+        print(f"已记录错题，编号：{add_wrong(args.question, args.answer, args.note)}")
+    elif args.command == "list-wrong":
+        rows = list_wrong()
+        if not rows:
+            print("错题本为空。")
+        for row in rows:
+            print(f"#{row['id']} 题目：{row['question']}\n   参考答案：{row['answer']}\n   笔记：{row['note']}\n")
+    elif args.command == "swipe-next":
+        if not args.confirm:
+            raise SystemExit("为避免误触，请确认后添加 --confirm 参数。")
+        swipe_next()
+        print("已发送一次滑动手势。")
+
+
+if __name__ == "__main__":
+    main()
