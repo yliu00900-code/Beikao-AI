@@ -41,7 +41,10 @@ adb devices
 git clone https://github.com/yliu00900-code/Beikao-AI.git
 cd Beikao-AI
 python main.py check
+python main.py doctor
 ```
+
+`python main.py doctor` 会只读检查 ADB 连接、屏幕分辨率和 Tesseract 中文语言包；不会控制手机。
 
 常用命令：
 
