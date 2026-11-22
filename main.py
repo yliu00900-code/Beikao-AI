@@ -1,6 +1,7 @@
 """Beikao-AI 命令行入口。"""
 import argparse
 from automation.adb import check_adb, take_screenshot
+from automation.diagnostics import run_diagnostics
 from automation.gesture import swipe_next
 from recognition.ocr import recognize
 from database.questions import add_wrong, list_wrong
@@ -10,6 +11,7 @@ def build_parser():
     parser = argparse.ArgumentParser(description="Beikao-AI Android 刷题辅助原型")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("check", help="检查 ADB 连接")
+    sub.add_parser("doctor", help="只读检查 ADB、屏幕分辨率和 OCR 环境")
     sub.add_parser("screenshot", help="截取手机屏幕")
     sub.add_parser("ocr", help="截图并执行 OCR")
     add = sub.add_parser("add-wrong", help="手动添加错题")
@@ -26,6 +28,8 @@ def main():
     args = build_parser().parse_args()
     if args.command == "check":
         print(check_adb())
+    elif args.command == "doctor":
+        print(run_diagnostics())
     elif args.command == "screenshot":
         print(f"截图已保存：{take_screenshot()}")
     elif args.command == "ocr":
