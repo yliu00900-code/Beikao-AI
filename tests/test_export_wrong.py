@@ -41,6 +41,7 @@ class ExportWrongQuestionsTests(unittest.TestCase):
 
     def test_formula_prefix_is_escaped_even_after_whitespace(self):
         questions.add_wrong("  =1+1", "\t+danger", "@text")
+        questions.export_wrong(self.csv_path)
         row = self.read_rows()[0]
         self.assertEqual(row["题目"], "'  =1+1")
         self.assertEqual(row["答案/记录"], "'\t+danger")
