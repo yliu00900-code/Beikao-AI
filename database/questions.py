@@ -1,7 +1,9 @@
-"""使用 SQLite 在本机保存错题。"""
+"""使用 SQLite 在本机保存错题，并支持导出 CSV。"""
+import csv
 import sqlite3
 from datetime import datetime, timezone
-from config import DATABASE_PATH
+from pathlib import Path
+from config import DATABASE_PATH, DATA_DIR
 
 
 def _connect():
@@ -37,3 +39,35 @@ def list_wrong():
         return [dict(row) for row in conn.execute(
             "SELECT * FROM wrong_questions ORDER BY id DESC"
         ).fetchall()]
+
+
+def _spreadsheet_safe(value):
+    """防止导出文本被表格软件误当作公式执行。"""
+    text = "" if value is None else str(value)
+    if text.startswith(("=", "+", "-", "@", "\t", "\r")):
+        return "'" + text
+    return text
+
+
+def export_wrong(output_path=None):
+    """将本地错题导出为 Excel 兼容 UTF-8 CSV，默认保存在 data/ 内。"""
+    rows = list_wrong()
+    if output_path is None:
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = DATA_DIR / f"错题本_{stamp}.csv"
+    path = Path(output_path).expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    headers = ["编号", "题目", "答案/记录", "笔记", "记录时间（UTC）"]
+    with path.open("w", encoding="utf-8-sig", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(headers)
+        for row in rows:
+            writer.writerow([
+                row["id"],
+                _spreadsheet_safe(row["question"]),
+                _spreadsheet_safe(row["answer"]),
+                _spreadsheet_safe(row["note"]),
+                row["created_at"],
+            ])
+    return path
