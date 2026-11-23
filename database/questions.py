@@ -44,7 +44,7 @@ def list_wrong():
 def _spreadsheet_safe(value):
     """防止导出文本被表格软件误当作公式执行。"""
     text = "" if value is None else str(value)
-    if text.startswith(("=", "+", "-", "@", "\t", "\r")):
+    if text.lstrip(" \t\r\n").startswith(("=", "+", "-", "@")):
         return "'" + text
     return text
 
