@@ -2,7 +2,6 @@ import csv
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 import database.questions as questions
 
@@ -40,11 +39,11 @@ class ExportWrongQuestionsTests(unittest.TestCase):
             self.assertEqual(next(reader), ["编号", "题目", "答案/记录", "笔记", "记录时间（UTC）"])
             self.assertEqual(list(reader), [])
 
-    def test_formula_prefix_is_escaped(self):
-        questions.add_wrong("=1+1", "+danger", "@text")
+    def test_formula_prefix_is_escaped_even_after_whitespace(self):
+        questions.add_wrong("  =1+1", "\t+danger", "@text")
         row = self.read_rows()[0]
-        self.assertEqual(row["题目"], "'=1+1")
-        self.assertEqual(row["答案/记录"], "'+danger")
+        self.assertEqual(row["题目"], "'  =1+1")
+        self.assertEqual(row["答案/记录"], "'\t+danger")
         self.assertEqual(row["笔记"], "'@text")
 
 
