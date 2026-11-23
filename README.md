@@ -12,7 +12,7 @@
 - `automation/gesture.py`：显式确认后执行滑动
 - `recognition/ocr.py`：Tesseract OCR
 - `answer/solver.py`：后续 AI 分析接口
-- `database/questions.py`：SQLite 错题本
+- `database/questions.py`：SQLite 错题本，支持 CSV 导出
 
 ## Android / Termux 环境
 
@@ -53,10 +53,23 @@ python main.py screenshot
 python main.py ocr
 python main.py add-wrong --question "示例题目" --answer "C" --note "复习知识点"
 python main.py list-wrong
+python main.py export-wrong
 python main.py swipe-next --confirm
 ```
 
 截图保存到本地 `captures/latest.png`；错题数据库保存在本地 `data/questions.db`。OCR 需要安装 Tesseract 中文语言数据。滑动坐标可在 `config.py` 修改。首次使用前请先校准坐标，避免误触。
+
+### 导出错题
+
+`python main.py export-wrong` 会生成带中文表头的 UTF-8 CSV 文件，默认保存在项目的 `data/` 目录中。文件名带时间戳，不会覆盖之前的导出；空错题本也会导出表头。导出文本会对以公式符号开头的字段做防护，降低 Excel 等表格软件误执行公式的风险。
+
+若希望将文件保存到手机的「下载」目录，先在 Termux 执行 `termux-setup-storage` 并同意存储权限，再运行：
+
+```bash
+python main.py export-wrong --output ~/storage/downloads/错题本.csv
+```
+
+导出的错题数据仅在本机。不要将 CSV、截图、个人答题数据、账号信息、配对码或密钥提交到公开仓库。
 
 ## 已知限制与下一步
 
