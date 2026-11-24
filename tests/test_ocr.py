@@ -4,10 +4,16 @@ import tempfile
 import unittest
 from unittest import mock
 
-from recognition.ocr import select_language, recognize
+from recognition.ocr import available_languages, select_language, recognize
 
 
 class SelectLanguageTests(unittest.TestCase):
+    def test_available_languages_parses_tesseract_output(self):
+        result = mock.Mock(returncode=0, stdout='List of available languages in "tessdata" (2):\neng\nchi_sim\n', stderr='')
+        with mock.patch('recognition.ocr.shutil.which', return_value='/usr/bin/tesseract'), \
+             mock.patch('recognition.ocr.subprocess.run', return_value=result):
+            self.assertEqual(available_languages(), ['eng', 'chi_sim'])
+
     def test_select_chinese_and_english_when_both_installed(self):
         self.assertEqual(select_language(None, ["eng", "chi_sim"]), ("chi_sim+eng", None))
 
