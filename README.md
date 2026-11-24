@@ -65,7 +65,6 @@ python main.py screenshot
 python main.py ocr
 python main.py add-wrong --question "示例题目" --answer "C" --note "复习知识点"
 python main.py list-wrong
-python main.py export-wrong
 python main.py swipe-next --confirm
 ```
 
@@ -77,7 +76,13 @@ python main.py ocr --lang chi_sim+eng
 
 ### 识别手机里已有的图片
 
-如果已通过 `termux-setup-storage` 授权访问手机存储，可以对 Downloads 中的图片进行 OCR，不需要连接 ADB：
+先在 Termux 执行一次：
+
+```bash
+termux-setup-storage
+```
+
+授权后可以对 Downloads 中的图片进行 OCR，不需要连接 ADB：
 
 ```bash
 python main.py ocr --image ~/storage/downloads/question.png --lang chi_sim+eng
