@@ -12,8 +12,12 @@ def build_parser():
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("check", help="检查 ADB 连接")
     sub.add_parser("doctor", help="只读检查 ADB、屏幕分辨率和 OCR 环境")
-    sub.add_parser("screenshot", help="截取手机屏幕")
-    sub.add_parser("ocr", help="截图并执行 OCR")
+    screenshot = sub.add_parser("screenshot", help="截取手机屏幕")
+    screenshot.add_argument("--device", help="多台设备时指定 ADB 序列号")
+    ocr = sub.add_parser("ocr", help="截图或指定本地图片并执行 OCR")
+    ocr.add_argument("--image", help="识别本地图片路径；不指定则截图")
+    ocr.add_argument("--lang", help="指定语言，例如 chi_sim+eng；默认自动检测")
+    ocr.add_argument("--device", help="多台设备时指定 ADB 序列号")
     add = sub.add_parser("add-wrong", help="手动添加错题")
     add.add_argument("--question", required=True)
     add.add_argument("--answer", default="")
@@ -31,9 +35,9 @@ def main():
     elif args.command == "doctor":
         print(run_diagnostics())
     elif args.command == "screenshot":
-        print(f"截图已保存：{take_screenshot()}")
+        print(f"截图已保存：{take_screenshot(args.device)}")
     elif args.command == "ocr":
-        print(recognize())
+        print(recognize(args.image, args.lang, args.device))
     elif args.command == "add-wrong":
         print(f"已记录错题，编号：{add_wrong(args.question, args.answer, args.note)}")
     elif args.command == "list-wrong":

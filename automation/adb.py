@@ -26,15 +26,26 @@ def check_adb():
     )
 
 
-def take_screenshot():
-    if not connected_devices():
+def take_screenshot(device_serial=None):
+    """保存当前连接设备截图；多设备时要求用户显式指定序列号。"""
+    devices = connected_devices()
+    if not devices:
         raise RuntimeError("没有已连接的 ADB 设备，请先运行 python main.py check")
+    if device_serial and device_serial not in devices:
+        raise RuntimeError(f"指定设备 {device_serial} 未连接。当前设备：{', '.join(devices)}")
+    if not device_serial:
+        if len(devices) > 1:
+            raise RuntimeError("检测到多台设备，请使用 --device 指定其中一台：" + ", ".join(devices))
+        device_serial = devices[0]
+
     CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
     with LATEST_SCREENSHOT.open("wb") as output:
         result = subprocess.run(
-            ["adb", "exec-out", "screencap", "-p"],
+            ["adb", "-s", device_serial, "exec-out", "screencap", "-p"],
             stdout=output, stderr=subprocess.PIPE, timeout=30
         )
     if result.returncode:
         raise RuntimeError(result.stderr.decode("utf-8", "ignore") or "截图失败")
+    if LATEST_SCREENSHOT.stat().st_size == 0:
+        raise RuntimeError("ADB 返回成功但截图文件为空，请重新连接设备后重试。")
     return LATEST_SCREENSHOT
