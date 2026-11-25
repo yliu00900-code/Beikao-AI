@@ -68,7 +68,7 @@ python main.py list-wrong
 python main.py swipe-next --confirm
 ```
 
-截图保存到本地 `captures/latest.png`；错题数据库保存在本地 `data/questions.db`。OCR 识别需要 Tesseract 语言数据；默认优先使用 `chi_sim+eng`。若尚未安装中文包，会提示并临时用 `eng`，但中文识别准确度可能很低。可以显式指定语言：
+截图保存到本地 `captures/latest.png`；程序会先写入临时文件并检查 PNG 文件头，成功后才替换这张截图，因此 ADB 失败或返回无效数据时会保留上一张有效截图。错题数据库保存在本地 `data/questions.db`。OCR 识别需要 Tesseract 语言数据；默认优先使用 `chi_sim+eng`。若尚未安装中文包，会提示并临时用 `eng`，但中文识别准确度可能很低。可以显式指定语言：
 
 ```bash
 python main.py ocr --lang chi_sim+eng
