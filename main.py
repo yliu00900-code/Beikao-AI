@@ -23,8 +23,11 @@ def build_parser():
     add.add_argument("--answer", default="")
     add.add_argument("--note", default="")
     sub.add_parser("list-wrong", help="查看错题本")
+    export = sub.add_parser("export-wrong", help="将错题本导出为 CSV 文件")
+    export.add_argument("--output", help="指定 CSV 保存位置（默认保存在 data/ 目录）")
     swipe = sub.add_parser("swipe-next", help="执行一次右向左滑动")
-    swipe.add_argument("--confirm", action="store_true", help="明确确认执行手势")
+    swipe.add_argument("--confirm", action="store_true", help="明确确认执行一次手势")
+    swipe.add_argument("--device", help="多台设备时指定 ADB 序列号")
     return parser
 
 
@@ -45,12 +48,16 @@ def main():
         if not rows:
             print("错题本为空。")
         for row in rows:
-            print(f"#{row['id']} 题目：{row['question']}\n   参考答案：{row['answer']}\n   笔记：{row['note']}\n")
+            print(f"#{row['id']} 题目：{row['question']}\\n   参考答案：{row['answer']}\\n   笔记：{row['note']}\\n")
+    elif args.command == "export-wrong":
+        path = export_wrong(args.output)
+        print(f"已导出错题 CSV：{path}")
+        print("导出仅保存在本机；请勿上传包含个人答题数据的文件到公开仓库。")
     elif args.command == "swipe-next":
         if not args.confirm:
-            raise SystemExit("为避免误触，请确认后添加 --confirm 参数。")
-        swipe_next()
-        print("已发送一次滑动手势。")
+            raise SystemExit("为避免误触，请确认操作后添加 --confirm 参数。")
+        device = swipe_next(args.device, confirmed=True)
+        print(f"已向设备 {device} 发送一次滑动手势。")
 
 
 if __name__ == "__main__":
