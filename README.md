@@ -95,7 +95,15 @@ python main.py screenshot --device 设备序列号
 python main.py ocr --device 设备序列号
 ```
 
-截图和 OCR 都在手机本地执行，不会向外发送图片。滑动坐标可在 `config.py` 修改；首次使用前请先校准坐标。滑动命令只发送一次手势，必须显式加 `--confirm`，没有自动连续答题功能。
+### 滑动操作安全说明
+
+滑动只会执行一次，必须显式添加 `--confirm`。程序不会自动选择答案或连续答题。只有一台 ADB 设备时可以直接确认；如果同时连接多台设备，必须明确指定目标设备：
+
+```bash
+python main.py swipe-next --device 设备序列号 --confirm
+```
+
+不加 `--confirm` 时，程序会拒绝执行；多设备未指定 `--device` 时也会拒绝执行。请先在 `config.py` 校准坐标。截图和 OCR 都在手机本地执行，不会向外发送图片。
 
 ## 测试
 
