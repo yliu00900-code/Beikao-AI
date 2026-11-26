@@ -46,7 +46,10 @@ def main():
         if not rows:
             print("错题本为空。")
         for row in rows:
-            print(f"#{row['id']} 题目：{row['question']}\\n   参考答案：{row['answer']}\\n   笔记：{row['note']}\\n")
+            print(f"#{row['id']} 题目：{row['question']}")
+            print(f"   参考答案：{row['answer']}")
+            print(f"   笔记：{row['note']}")
+            print()
     elif args.command == "swipe-next":
         if not args.confirm:
             raise SystemExit("为避免误触，请确认操作后添加 --confirm 参数。")
