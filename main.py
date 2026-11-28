@@ -1,5 +1,9 @@
 """Beikao-AI 命令行入口。"""
 import argparse
+import sqlite3
+import subprocess
+import sys
+
 from automation.adb import check_adb, take_screenshot
 from automation.diagnostics import run_diagnostics
 from automation.gesture import swipe_next
@@ -31,31 +35,36 @@ def build_parser():
 
 def main():
     args = build_parser().parse_args()
-    if args.command == "check":
-        print(check_adb())
-    elif args.command == "doctor":
-        print(run_diagnostics())
-    elif args.command == "screenshot":
-        print(f"截图已保存：{take_screenshot(args.device)}")
-    elif args.command == "ocr":
-        print(recognize(args.image, args.lang, args.device))
-    elif args.command == "add-wrong":
-        print(f"已记录错题，编号：{add_wrong(args.question, args.answer, args.note)}")
-    elif args.command == "list-wrong":
-        rows = list_wrong()
-        if not rows:
-            print("错题本为空。")
-        for row in rows:
-            print(f"#{row['id']} 题目：{row['question']}")
-            print(f"   参考答案：{row['answer']}")
-            print(f"   笔记：{row['note']}")
-            print()
-    elif args.command == "swipe-next":
-        if not args.confirm:
-            raise SystemExit("为避免误触，请确认操作后添加 --confirm 参数。")
-        device = swipe_next(args.device, confirmed=True)
-        print(f"已向设备 {device} 发送一次滑动手势。")
+    try:
+        if args.command == "check":
+            print(check_adb())
+        elif args.command == "doctor":
+            print(run_diagnostics())
+        elif args.command == "screenshot":
+            print(f"截图已保存：{take_screenshot(args.device)}")
+        elif args.command == "ocr":
+            print(recognize(args.image, args.lang, args.device))
+        elif args.command == "add-wrong":
+            print(f"已记录错题，编号：{add_wrong(args.question, args.answer, args.note)}")
+        elif args.command == "list-wrong":
+            rows = list_wrong()
+            if not rows:
+                print("错题本为空。")
+            for row in rows:
+                print(f"#{row['id']} 题目：{row['question']}")
+                print(f"   参考答案：{row['answer']}")
+                print(f"   笔记：{row['note']}")
+                print()
+        elif args.command == "swipe-next":
+            if not args.confirm:
+                raise RuntimeError("为避免误触，请确认操作后添加 --confirm 参数。")
+            device = swipe_next(args.device, confirmed=True)
+            print(f"已向设备 {device} 发送一次滑动手势。")
+    except (RuntimeError, ValueError, OSError, subprocess.SubprocessError, sqlite3.Error) as exc:
+        print(f"[错误] {exc}", file=sys.stderr)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
