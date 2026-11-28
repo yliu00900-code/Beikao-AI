@@ -33,15 +33,20 @@ def run_diagnostics():
             if len(parts) >= 2:
                 devices.append((parts[0], parts[1]))
         ready = [serial for serial, state in devices if state == "device"]
-        if ready:
+        if len(ready) == 1:
             device_serial = ready[0]
+            lines.append("[通过] ADB 已连接：" + device_serial)
+        elif len(ready) > 1:
             lines.append("[通过] ADB 已连接：" + ", ".join(ready))
-            if len(ready) > 1:
-                lines.append("[提示] 当前屏幕尺寸检查使用第一台设备。")
+            lines.append(
+                "[提示] 检测到多台设备，为避免任意选择，本次跳过屏幕分辨率检查。"
+            )
+            lines.append("[提示] 截图/OCR 请使用 --device 指定目标设备。")
         elif devices:
-            lines.append("[待处理] 检测到设备，但尚未授权或未就绪：" +
-                         ", ".join(serial + " (" + state + ")"
-                                   for serial, state in devices))
+            lines.append(
+                "[待处理] 检测到设备，但尚未授权或未就绪：" +
+                ", ".join(serial + " (" + state + ")" for serial, state in devices)
+            )
         else:
             lines.append("[待处理] ADB 已安装，但没有检测到已连接设备。")
 
@@ -68,9 +73,16 @@ def run_diagnostics():
             if "chi_sim" in languages:
                 lines.append("[通过] 中文简体语言包 chi_sim 已安装。")
             else:
-                lines.append("[待处理] 未发现 chi_sim 中文简体语言包。")
-            lines.append("[信息] 已安装语言：" +
-                         (", ".join(languages) if languages else "未列出"))
+                lines.append(
+                    "[待处理] 未发现 chi_sim；OCR 命令会提示并临时使用 eng（中文识别可能不准）。"
+                )
+                lines.append(
+                    "[提示] README 已提供从官方 tessdata_fast 下载 chi_sim.traineddata 的步骤。"
+                )
+            lines.append(
+                "[信息] 已安装语言：" +
+                (", ".join(languages) if languages else "未列出")
+            )
 
     lines.append("")
     lines.append("说明：本命令只检查环境，不会截图、点击、滑动或选择答案。")
